@@ -32,6 +32,7 @@ Scope (default: interactive):
 
 Other:
   --skip-deps         Skip dependency checks
+  --update            Update skill files (auto-detect installed scopes)
   --doctor            Check skill installation and dependency status
   -h, --help          Show this help
 
@@ -39,6 +40,7 @@ Examples:
   ./install.sh                        # interactive
   ./install.sh --user                 # Claude Code, user scope
   ./install.sh --codex --project      # Codex, project scope
+  ./install.sh --update               # update all installed copies
 EOF
   exit 0
 }
@@ -48,6 +50,7 @@ AGENT=""
 SCOPE=""
 SKIP_DEPS=false
 DOCTOR=false
+UPDATE=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -56,6 +59,7 @@ while [[ $# -gt 0 ]]; do
     -p|--project) SCOPE="project"; shift ;;
     -u|--user)    SCOPE="user"; shift ;;
     --skip-deps)  SKIP_DEPS=true; shift ;;
+    --update)     UPDATE=true; shift ;;
     --doctor)     DOCTOR=true; shift ;;
     -h|--help)    usage ;;
     *) err "Unknown option: $1"; usage ;;
@@ -122,19 +126,48 @@ get_target_dir() {
 }
 
 # ─── Install Skill ───
-install_skill() {
-  local target
-  target="$(get_target_dir)"
-
-  info "Installing to ${SCOPE} scope: ${target}"
-
+copy_skill_to() {
+  local target="$1"
   mkdir -p "${target}/assets"
   cp "${SCRIPT_DIR}/skill.md"              "${target}/skill.md"
   cp "${SCRIPT_DIR}/assets/template.html"  "${target}/assets/template.html"
   cp "${SCRIPT_DIR}/assets/preview.html"   "${target}/assets/preview.html"
   cp "${SCRIPT_DIR}/assets/generate.py"    "${target}/assets/generate.py"
+}
 
+install_skill() {
+  local target
+  target="$(get_target_dir)"
+  info "Installing to ${SCOPE} scope: ${target}"
+  copy_skill_to "${target}"
   ok "Skill files installed"
+}
+
+# ─── Update ───
+run_update() {
+  printf "\n  ${BOLD}╔══════════════════════════════════════╗${NC}\n"
+  printf "  ${BOLD}║   Travel Planner — Update            ║${NC}\n"
+  printf "  ${BOLD}╚══════════════════════════════════════╝${NC}\n\n"
+
+  local updated=0
+  for dir in \
+    "$(pwd)/.claude/skills/${SKILL_NAME}" \
+    "${HOME}/.claude/skills/${SKILL_NAME}" \
+    "$(pwd)/.codex/skills/${SKILL_NAME}" \
+    "${HOME}/.codex/skills/${SKILL_NAME}"; do
+    if [[ -f "${dir}/skill.md" ]]; then
+      copy_skill_to "${dir}"
+      ok "Updated: ${dir}"
+      updated=$((updated + 1))
+    fi
+  done
+
+  if [[ $updated -eq 0 ]]; then
+    warn "No existing installation found. Run ./install.sh to install first."
+  else
+    printf "\n  ${GREEN}${updated}${NC} installation(s) updated.\n"
+  fi
+  printf "\n"
 }
 
 # ─── Dependency Helpers ───
@@ -474,6 +507,11 @@ run_doctor() {
 main() {
   if $DOCTOR; then
     run_doctor
+    return
+  fi
+
+  if $UPDATE; then
+    run_update
     return
   fi
 

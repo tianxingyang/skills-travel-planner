@@ -38,13 +38,13 @@ All optional — each has a built-in fallback via web search.
 | **mcporter** + 小红书 MCP | 小红书笔记搜索 | — | `site:xiaohongshu.com` web search |
 | **grok-search** MCP | 网络搜索 + 网页抓取 | [GuDaStudio/GrokSearch](https://github.com/GuDaStudio/GrokSearch/tree/grok-with-tavily) | built-in WebSearch / WebFetch |
 
-Diagnose installation status:
+Update & diagnose:
 
 ```bash
-# Local
-./install.sh --doctor
+# Update all installed copies to latest
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --update
 
-# Remote
+# Diagnose installation status
 curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --doctor
 ```
 
