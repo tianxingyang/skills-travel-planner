@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{TRIP_TITLE}}</title>
+<style>
+  :root {
+    --primary: #0EA5E9;
+    --primary-dark: #0284C7;
+    --primary-light: #E0F2FE;
+    --primary-50: #F0F9FF;
+    --accent: #F97316;
+    --accent-dark: #EA580C;
+    --accent-light: #FFF7ED;
+    --success: #10B981;
+    --success-light: #D1FAE5;
+    --rose: #F43F5E;
+    --rose-light: #FFF1F2;
+    --violet: #8B5CF6;
+    --bg: #F8FAFC;
+    --card: #FFFFFF;
+    --text: #0C4A6E;
+    --text-body: #334155;
+    --text-muted: #64748B;
+    --border: #E2E8F0;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 28px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --transition: 200ms ease-out;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text-body); line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+
+  .container { max-width: 980px; margin: 0 auto; padding: 24px 20px 48px; }
+
+  /* ---- SVG Icon System ---- */
+  .icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; flex-shrink: 0;
+  }
+  .icon svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .icon-sm { width: 16px; height: 16px; }
+  .icon-lg { width: 24px; height: 24px; }
+
+  /* ---- Hero ---- */
+  .hero {
+    position: relative; border-radius: var(--radius); padding: 56px 44px 48px;
+    margin-bottom: 36px; overflow: hidden; color: white;
+    background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 50%, #8B5CF6 100%);
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 600px 400px at 20% 80%, rgba(249,115,22,0.2) 0%, transparent 70%),
+      radial-gradient(ellipse 500px 500px at 80% 20%, rgba(139,92,246,0.3) 0%, transparent 60%),
+      radial-gradient(ellipse 300px 300px at 60% 60%, rgba(255,255,255,0.06) 0%, transparent 50%);
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .hero h1 { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 14px; line-height: 1.2; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 20px; font-size: 0.92rem; opacity: 0.92; }
+  .hero-meta-item { display: flex; align-items: center; gap: 7px; }
+  .hero-meta-item .icon { color: rgba(255,255,255,0.85); }
+  .hero-orb {
+    position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.12; pointer-events: none;
+    animation: orbFloat 10s ease-in-out infinite alternate;
+  }
+  .hero-orb-1 { width: 300px; height: 300px; background: #F97316; top: -80px; right: -60px; }
+  .hero-orb-2 { width: 200px; height: 200px; background: #38BDF8; bottom: -60px; left: -40px; animation-delay: -5s; }
+
+  @keyframes orbFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(20px, -15px) scale(1.1); }
+  }
+
+  /* ---- Section Nav ---- */
+  .section-nav {
+    display: flex; gap: 8px; margin-bottom: 32px; overflow-x: auto;
+    padding-bottom: 4px; -webkit-overflow-scrolling: touch;
+  }
+  .section-nav::-webkit-scrollbar { height: 0; }
+  .nav-pill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+    border-radius: 99px; font-size: 0.85rem; font-weight: 500; white-space: nowrap;
+    background: var(--card); border: 1px solid var(--border); color: var(--text-muted);
+    cursor: pointer; transition: all var(--transition); text-decoration: none;
+  }
+  .nav-pill:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+  .nav-pill .icon { width: 16px; height: 16px; }
+
+  /* ---- Section ---- */
+  .section { margin-bottom: 40px; scroll-margin-top: 20px; }
+  .section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .section-icon {
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: var(--radius-sm);
+    background: var(--primary-light); color: var(--primary);
+  }
+  .section-title { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+
+  /* ---- Weather ---- */
+  .weather-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+  .weather-bar::-webkit-scrollbar { height: 4px; }
+  .weather-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+  .weather-card {
+    flex: 0 0 auto; min-width: 108px; background: var(--card); border-radius: var(--radius-sm);
+    padding: 14px 12px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+    transition: all var(--transition);
+  }
+  .weather-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .weather-card .w-date { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }
+  .weather-card .w-icon { font-size: 28px; line-height: 1; margin: 4px 0 8px; }
+  .weather-card .w-icon svg { width: 32px; height: 32px; }
+  .weather-card .w-temp { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+  .weather-card .w-temp-low { color: var(--text-muted); font-weight: 400; }
+  .weather-tip {
+    display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; padding: 14px 18px;
+    background: var(--primary-50); border: 1px solid #BAE6FD; border-radius: var(--radius-sm); font-size: 0.88rem; color: var(--primary-dark);
+  }
+  .weather-tip .icon { flex-shrink: 0; margin-top: 1px; }
+
+  /* ---- Day Card ---- */
+  .day-card {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    border: 1px solid var(--border); margin-bottom: 16px; overflow: hidden;
+    transition: box-shadow var(--transition);
+  }
+  .day-card:hover { box-shadow: var(--shadow-md); }
+  .day-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px; cursor: pointer; user-select: none;
+    transition: background var(--transition);
+  }
+  .day-header:hover { background: var(--primary-50); }
+  .day-header:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+  .day-num {
+    display: flex; align-items: center; justify-content: center;
+    width: 40px; height: 40px; border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--primary), var(--violet));
+    color: white; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; margin-right: 14px;
+  }
+  .day-header-left { display: flex; align-items: center; }
+  .day-header-info h3 { font-size: 1.05rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .day-header-info .day-meta { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 6px; }
+  .day-header .toggle-icon {
+    width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); color: var(--text-muted); transition: all var(--transition);
+  }
+  .day-card.collapsed .toggle-icon { transform: rotate(-90deg); }
+  .day-body {
+    padding: 4px 22px 22px; border-top: 1px solid var(--border);
+    max-height: 3000px; overflow: hidden; transition: max-height 0.35s ease-out, padding 0.35s ease-out;
+  }
+  .day-card.collapsed .day-body { max-height: 0; padding-top: 0; padding-bottom: 0; border-top-color: transparent; }
+
+  /* ---- Timeline ---- */
+  .timeline { position: relative; padding-left: 32px; padding-top: 18px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 10px; top: 24px; bottom: 12px;
+    width: 2px; background: linear-gradient(to bottom, var(--primary), var(--border));
+    border-radius: 2px;
+  }
+  .tl-item { position: relative; margin-bottom: 22px; }
+  .tl-item:last-child { margin-bottom: 0; }
+  .tl-dot {
+    position: absolute; left: -28px; top: 4px; width: 14px; height: 14px;
+    border-radius: 50%; border: 2.5px solid var(--primary); background: white; z-index: 1;
+    box-shadow: 0 0 0 3px var(--primary-light);
+  }
+  .tl-item.is-meal .tl-dot { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 3px var(--accent-light); }
+  .tl-time { font-size: 0.78rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 3px; }
+  .tl-content h4 { font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .tl-content p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+  .tl-tags { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.73rem; padding: 3px 10px; border-radius: 99px; font-weight: 500;
+  }
+  .tag-cost { background: var(--accent-light); color: var(--accent-dark); }
+  .tag-transport { background: var(--success-light); color: #047857; }
+  .tag-free { background: var(--primary-light); color: var(--primary-dark); }
+
+  /* ---- Meal Card ---- */
+  .meal-card {
+    display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+    background: linear-gradient(135deg, #FFF7ED, #FFFBEB); border: 1px solid #FED7AA;
+    border-radius: var(--radius-sm); margin-top: 6px;
+  }
+  .meal-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: white; display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-sm); color: var(--accent); flex-shrink: 0;
+  }
+  .meal-info { flex: 1; min-width: 0; }
+  .meal-name { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+  .meal-detail { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meal-price { font-weight: 700; color: var(--accent-dark); white-space: nowrap; font-size: 0.95rem; }
+
+  /* ---- Hotels ---- */
+  .hotel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .hotel-card {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    border: 1px solid var(--border); padding: 22px; position: relative;
+    cursor: default; transition: all var(--transition);
+  }
+  .hotel-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+  .hotel-badge {
+    position: absolute; top: 14px; right: 14px;
+    background: linear-gradient(135deg, var(--primary), var(--violet));
+    color: white; font-size: 0.72rem; font-weight: 600;
+    padding: 3px 12px; border-radius: 99px;
+  }
+  .hotel-name { font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: 6px; padding-right: 60px; }
+  .hotel-area { display: flex; align-items: center; gap: 5px; font-size: 0.83rem; color: var(--text-muted); margin-bottom: 12px; }
+  .hotel-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 12px; }
+  .hotel-price { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+  .hotel-price-unit { font-size: 0.8rem; color: var(--text-muted); }
+  .hotel-highlights { font-size: 0.83rem; color: var(--text-muted); line-height: 1.6; }
+  .hotel-tag { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 4px; background: var(--primary-light); color: var(--primary-dark); margin-right: 4px; margin-bottom: 4px; }
+
+  /* ---- Budget ---- */
+  .budget-wrapper {
+    background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .budget-chart { display: flex; height: 8px; overflow: hidden; }
+  .budget-chart-seg { transition: width 0.6s ease-out; }
+  .budget-table { width: 100%; border-collapse: collapse; }
+  .budget-table th, .budget-table td { padding: 12px 18px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+  .budget-table th { background: var(--bg); color: var(--text-muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .budget-table .cat-row td { font-weight: 600; color: var(--text); background: var(--primary-50); }
+  .budget-table .cat-row .cat-icon { display: inline-flex; align-items: center; gap: 8px; }
+  .budget-table .cat-row .cat-icon .icon { color: var(--primary); }
+  .budget-table .sub-row td { color: var(--text-muted); padding-left: 48px; }
+  .budget-table .subtotal { text-align: right; font-weight: 600; color: var(--primary); }
+  .budget-table td:last-child { text-align: right; }
+
+  .budget-total {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 22px 24px;
+    background: linear-gradient(135deg, #0EA5E9 0%, #6366F1 50%, #8B5CF6 100%);
+    border-radius: var(--radius); color: white; margin-top: 16px;
+  }
+  .budget-total-label { font-size: 0.95rem; font-weight: 500; opacity: 0.9; }
+  .budget-total-per { font-size: 0.85rem; opacity: 0.75; margin-top: 2px; }
+  .budget-total-amount { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; }
+
+  /* ---- Tips ---- */
+  .tips-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .tip-card {
+    display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+    background: var(--accent-light); border: 1px solid #FED7AA; border-radius: var(--radius-sm);
+    font-size: 0.88rem; color: var(--text-body);
+  }
+  .tip-icon {
+    width: 28px; height: 28px; border-radius: 8px; background: white;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-sm); color: var(--accent); flex-shrink: 0;
+  }
+  .tip-icon .icon { width: 14px; height: 14px; }
+
+  /* ---- Footer ---- */
+  .footer { text-align: center; padding: 28px 20px; color: var(--text-muted); font-size: 0.78rem; margin-top: 20px; }
+  .footer-line { width: 48px; height: 3px; background: linear-gradient(90deg, var(--primary), var(--violet)); border-radius: 99px; margin: 0 auto 12px; }
+
+  /* ---- Print ---- */
+  @media print {
+    body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .container { padding: 0; max-width: 100%; }
+    .hero { break-inside: avoid; }
+    .day-card { break-inside: avoid; }
+    .day-card.collapsed .day-body { max-height: none !important; padding: 4px 22px 22px !important; border-top: 1px solid var(--border) !important; }
+    .toggle-icon, .section-nav { display: none !important; }
+    .hotel-card:hover, .weather-card:hover, .day-card:hover { transform: none; box-shadow: var(--shadow); }
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 640px) {
+    .container { padding: 16px 14px 32px; }
+    .hero { padding: 36px 24px 32px; }
+    .hero h1 { font-size: 1.55rem; }
+    .hero-meta { gap: 12px; font-size: 0.85rem; }
+    .day-header { padding: 14px 16px; }
+    .day-num { width: 34px; height: 34px; font-size: 0.78rem; margin-right: 10px; }
+    .day-body { padding: 4px 16px 16px; }
+    .timeline { padding-left: 26px; }
+    .hotel-grid { grid-template-columns: 1fr; }
+    .tips-grid { grid-template-columns: 1fr; }
+    .budget-total { flex-direction: column; text-align: center; gap: 8px; padding: 18px; }
+    .section-nav { gap: 6px; }
+    .nav-pill { padding: 6px 12px; font-size: 0.8rem; }
+  }
+
+  /* ---- Reduced Motion ---- */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    .day-body { transition: none; }
+  }
+
+  /* ---- Focus ---- */
+  :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero" role="banner">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-content">
+      <h1 id="heroTitle">{{TRIP_TITLE}}</h1>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+          <span id="heroDate">{{DATE_RANGE}}</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          <span id="heroTravelers">{{TRAVELERS}}</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          <span>预估 <strong id="heroBudget">¥{{TOTAL_BUDGET}}</strong></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section Nav -->
+  <nav class="section-nav" aria-label="快速导航">
+    <a class="nav-pill" href="#sec-weather"><span class="icon"><svg viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z"/><path d="M12 2v2M2 12h2m16 0h2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/></svg></span>天气</a>
+    <a class="nav-pill" href="#sec-days"><span class="icon"><svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>行程</a>
+    <a class="nav-pill" href="#sec-hotels"><span class="icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M3 7v14M21 7v14M6 7V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v3M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/></svg></span>住宿</a>
+    <a class="nav-pill" href="#sec-budget"><span class="icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>预算</a>
+    <a class="nav-pill" href="#sec-tips"><span class="icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span>贴士</a>
+  </nav>
+
+  <!-- Weather -->
+  <div class="section" id="sec-weather">
+    <div class="section-header">
+      <div class="section-icon"><span class="icon icon-lg"><svg viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Z"/><path d="M12 2v2M2 12h2m16 0h2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/></svg></span></div>
+      <h2 class="section-title">天气概览</h2>
+    </div>
+    <div class="weather-bar" id="weatherBar"></div>
+    <div class="weather-tip" id="weatherTip"></div>
+  </div>
+
+  <!-- Daily Itinerary -->
+  <div class="section" id="sec-days">
+    <div class="section-header">
+      <div class="section-icon"><span class="icon icon-lg"><svg viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg></span></div>
+      <h2 class="section-title">每日行程</h2>
+    </div>
+    <div id="daysContainer"></div>
+  </div>
+
+  <!-- Hotels -->
+  <div class="section" id="sec-hotels">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--accent-light);color:var(--accent);"><span class="icon icon-lg"><svg viewBox="0 0 24 24"><path d="M3 21h18M3 7v14M21 7v14M6 7V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v3M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/></svg></span></div>
+      <h2 class="section-title">住宿推荐</h2>
+    </div>
+    <div class="hotel-grid" id="hotelGrid"></div>
+  </div>
+
+  <!-- Budget -->
+  <div class="section" id="sec-budget">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--success-light);color:var(--success);"><span class="icon icon-lg"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span></div>
+      <h2 class="section-title">预算明细</h2>
+    </div>
+    <div class="budget-wrapper">
+      <div class="budget-chart" id="budgetChart"></div>
+      <table class="budget-table" id="budgetTable">
+        <thead><tr><th>分类</th><th>项目</th><th style="text-align:right">费用</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="budget-total" id="budgetTotal">
+      <div>
+        <div class="budget-total-label">预估总费用</div>
+        <div class="budget-total-per">人均 ¥{{PER_PERSON}}</div>
+      </div>
+      <div class="budget-total-amount">¥{{TOTAL_BUDGET}}</div>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div class="section" id="sec-tips">
+    <div class="section-header">
+      <div class="section-icon" style="background:var(--rose-light);color:var(--rose);"><span class="icon icon-lg"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span></div>
+      <h2 class="section-title">实用贴士</h2>
+    </div>
+    <div class="tips-grid" id="tipsList"></div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-line"></div>
+    <p>由 AI 生成 · 价格与信息仅供参考，请以实际为准 · {{GENERATION_DATE}}</p>
+  </footer>
+
+</div>
+
+<script>
+const tripData = {{TRIP_DATA_JSON}};
+
+// SVG icon templates (inline, no external deps)
+const SVG = {
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>',
+  cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>',
+  cloudSun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v2M4.93 4.93l1.41 1.41M20 12h2M4 12H2M19.07 4.93l-1.41 1.41"/><circle cx="12" cy="9" r="4" opacity=".5"/><path d="M18 13h-1.26A7 7 0 0 0 6 15.26 5 5 0 1 0 9 23h9a5 5 0 0 0 0-10z"/></svg>',
+  rain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 13V4a4 4 0 0 0-8 0v1H6a4 4 0 0 0 0 8h10a4 4 0 0 0 0-8Z"/><path d="M8 19v2M12 19v2M16 19v2"/></svg>',
+  storm: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><path d="m13 12-3 5h4l-3 5"/></svg>',
+  snow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><path d="M8 18l.01 0M12 18l.01 0M16 18l.01 0"/></svg>',
+  utensils: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>',
+  mapPin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+  lightbulb: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+  plane: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>',
+  hotel: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 21h18M3 7v14M21 7v14M6 7V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v3"/><rect x="7" y="10" width="3" height="3" rx=".5"/><rect x="14" y="10" width="3" height="3" rx=".5"/><path d="M9 21v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4"/></svg>',
+  ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2M13 17v2M13 11v2"/></svg>',
+  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
+  chevDown: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>'
+};
+
+const weatherIcons = { sunny: SVG.sun, cloudy: SVG.cloud, rainy: SVG.rain, stormy: SVG.storm, snowy: SVG.snow, partlyCloudy: SVG.cloudSun, overcast: SVG.cloud };
+const budgetColors = { transport: '#0EA5E9', accommodation: '#8B5CF6', food: '#F97316', tickets: '#F43F5E', other: '#64748B' };
+const budgetIcons = { transport: SVG.plane, accommodation: SVG.hotel, food: SVG.utensils, tickets: SVG.ticket, other: SVG.box };
+const budgetLabels = { transport: '交通', accommodation: '住宿', food: '餐饮', tickets: '门票', other: '其他' };
+
+function renderWeather(weather, days) {
+  const bar = document.getElementById('weatherBar');
+  bar.innerHTML = days.map(d => {
+    const icon = weatherIcons[d.weather.icon] || SVG.cloudSun;
+    return `<div class="weather-card">
+      <div class="w-date">${d.date} ${d.weekday}</div>
+      <div class="w-icon" style="color:${d.weather.icon === 'sunny' ? '#F59E0B' : d.weather.icon === 'rainy' ? '#0EA5E9' : '#64748B'}">${icon}</div>
+      <div class="w-temp">${d.weather.high}° <span class="w-temp-low">/ ${d.weather.low}°</span></div>
+    </div>`;
+  }).join('');
+
+  const tip = document.getElementById('weatherTip');
+  tip.innerHTML = `<span class="icon" style="color:var(--primary)">${SVG.info}</span>
+    <span>${weather.clothing} · 降水概率 ${weather.rainfall} · ${weather.tips}</span>`;
+}
+
+function renderDays(days) {
+  const container = document.getElementById('daysContainer');
+  container.innerHTML = days.map((day, i) => {
+    const wIcon = weatherIcons[day.weather.icon] || SVG.cloudSun;
+    const acts = day.activities.map(a => {
+      const isMeal = a.meal || /[午晚早]餐/.test(a.name);
+      let html = `<div class="tl-item${isMeal ? ' is-meal' : ''}"><div class="tl-dot"></div>`;
+      html += `<div class="tl-time">${a.time}${a.duration ? ' · ' + a.duration : ''}</div><div class="tl-content">`;
+      html += `<h4>${a.name}</h4>`;
+      if (a.note) html += `<p>${a.note}</p>`;
+      if (a.meal) {
+        html += `<div class="meal-card">
+          <div class="meal-icon"><span class="icon">${SVG.utensils}</span></div>
+          <div class="meal-info">
+            <div class="meal-name">${a.meal.name}</div>
+            <div class="meal-detail">${a.meal.cuisine} · ${a.meal.location}${a.meal.recommended ? ' · 推荐：' + a.meal.recommended : ''}</div>
+          </div>
+          <div class="meal-price">¥${a.meal.perPerson}/人</div>
+        </div>`;
+      }
+      const tags = [];
+      if (a.cost === 0) tags.push(`<span class="tag tag-free">免费</span>`);
+      else if (a.cost) tags.push(`<span class="tag tag-cost">¥${a.cost}</span>`);
+      if (a.transport) tags.push(`<span class="tag tag-transport">${a.transport}</span>`);
+      if (tags.length) html += `<div class="tl-tags">${tags.join('')}</div>`;
+      html += `</div></div>`;
+      return html;
+    }).join('');
+
+    return `<div class="day-card">
+      <div class="day-header" tabindex="0" role="button" aria-expanded="true"
+           onclick="toggleDay(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleDay(this)}">
+        <div class="day-header-left">
+          <div class="day-num">D${i + 1}</div>
+          <div class="day-header-info">
+            <h3>${day.theme}</h3>
+            <div class="day-meta">
+              <span>${day.date} ${day.weekday}</span>
+              <span style="display:inline-flex;align-items:center;gap:3px;color:${day.weather.icon === 'sunny' ? '#F59E0B' : '#64748B'}">
+                <span class="icon icon-sm">${wIcon}</span> ${day.weather.high}°/${day.weather.low}°
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="toggle-icon"><span class="icon icon-sm">${SVG.chevDown}</span></div>
+      </div>
+      <div class="day-body"><div class="timeline">${acts}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDay(el) {
+  const card = el.closest('.day-card');
+  const expanded = !card.classList.contains('collapsed');
+  card.classList.toggle('collapsed');
+  el.setAttribute('aria-expanded', !expanded);
+}
+
+function renderHotels(hotels) {
+  document.getElementById('hotelGrid').innerHTML = hotels.map((h, i) => {
+    const tags = h.highlights.split(/[;；、,，]/).filter(Boolean).map(t => `<span class="hotel-tag">${t.trim()}</span>`).join('');
+    return `<div class="hotel-card">
+      ${i === 0 ? '<div class="hotel-badge">推荐</div>' : ''}
+      <div class="hotel-name">${h.name}</div>
+      <div class="hotel-area"><span class="icon icon-sm" style="color:var(--accent)">${SVG.mapPin}</span>${h.area}</div>
+      <div class="hotel-price-row"><span class="hotel-price">¥${h.pricePerNight}</span><span class="hotel-price-unit">/晚</span></div>
+      <div class="hotel-highlights">${tags}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderBudget(budget) {
+  // Chart bar
+  const cats = Object.entries(budget).filter(([k]) => !['total', 'perPerson'].includes(k));
+  const total = budget.total || cats.reduce((s, [, d]) => s + d.subtotal, 0);
+  document.getElementById('budgetChart').innerHTML = cats.map(([cat, data]) =>
+    `<div class="budget-chart-seg" style="width:${(data.subtotal / total * 100).toFixed(1)}%;background:${budgetColors[cat] || '#94A3B8'}"></div>`
+  ).join('');
+
+  // Table
+  const tbody = document.querySelector('#budgetTable tbody');
+  tbody.innerHTML = cats.map(([cat, data]) => {
+    const icon = budgetIcons[cat] || SVG.box;
+    const label = budgetLabels[cat] || cat;
+    let rows = `<tr class="cat-row"><td colspan="2"><span class="cat-icon"><span class="icon icon-sm" style="color:${budgetColors[cat]}">${icon}</span>${label}</span></td><td class="subtotal">¥${data.subtotal.toLocaleString()}</td></tr>`;
+    data.items.forEach(item => { rows += `<tr class="sub-row"><td></td><td>${item.name}</td><td>¥${item.cost.toLocaleString()}</td></tr>`; });
+    return rows;
+  }).join('');
+
+  // Total bar
+  const el = document.getElementById('budgetTotal');
+  el.querySelector('.budget-total-amount').textContent = `¥${total.toLocaleString()}`;
+  el.querySelector('.budget-total-per').textContent = `人均 ¥${(budget.perPerson || 0).toLocaleString()}`;
+}
+
+function renderTips(tips) {
+  document.getElementById('tipsList').innerHTML = tips.map(t =>
+    `<div class="tip-card"><div class="tip-icon"><span class="icon">${SVG.lightbulb}</span></div><span>${t}</span></div>`
+  ).join('');
+}
+
+if (tripData) {
+  document.getElementById('heroTitle').textContent = tripData.title;
+  if (tripData.dateRange) document.getElementById('heroDate').textContent = tripData.dateRange;
+  if (tripData.travelers) document.getElementById('heroTravelers').textContent = tripData.travelers;
+  if (tripData.budget) document.getElementById('heroBudget').textContent = `¥${(tripData.budget.total || 0).toLocaleString()}`;
+  renderWeather(tripData.weather, tripData.days);
+  renderDays(tripData.days);
+  renderHotels(tripData.hotels);
+  renderBudget(tripData.budget);
+  renderTips(tripData.tips);
+}
+</script>
+</body>
+</html>
