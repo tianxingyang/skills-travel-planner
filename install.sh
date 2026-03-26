@@ -25,6 +25,7 @@ Install the travel-planner skill for Claude Code.
 Options:
   -p, --project     Install to current project scope (./.claude/skills/)
   -u, --user        Install to user scope (~/.claude/skills/)
+  -c, --codex       Install to Codex agent (~/.codex/skills/)
   --skip-deps       Skip dependency checks
   --doctor          Check skill installation and dependency status
   -h, --help        Show this help
@@ -43,6 +44,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -p|--project) SCOPE="project"; shift ;;
     -u|--user)    SCOPE="user"; shift ;;
+    -c|--codex)   SCOPE="codex"; shift ;;
     --skip-deps)  SKIP_DEPS=true; shift ;;
     --doctor)     DOCTOR=true; shift ;;
     -h|--help)    usage ;;
@@ -57,15 +59,17 @@ select_scope() {
   fi
 
   printf "\n  Select installation scope:\n"
-  printf "    ${CYAN}1)${NC} project — Current directory only ${DIM}($(pwd))${NC}\n"
-  printf "    ${CYAN}2)${NC} user    — All projects ${DIM}(~/.claude/skills/)${NC}\n\n"
+  printf "    ${CYAN}1)${NC} project    — Current directory only ${DIM}($(pwd)/.claude/skills/)${NC}\n"
+  printf "    ${CYAN}2)${NC} user       — All Claude Code projects ${DIM}(~/.claude/skills/)${NC}\n"
+  printf "    ${CYAN}3)${NC} codex      — Codex agent ${DIM}(~/.codex/skills/)${NC}\n\n"
 
   while true; do
-    prompt "  Choice [1/2]: " choice
+    prompt "  Choice [1/2/3]: " choice
     case "$choice" in
       1) SCOPE="project"; return ;;
       2) SCOPE="user"; return ;;
-      *) warn "Please enter 1 or 2" ;;
+      3) SCOPE="codex"; return ;;
+      *) warn "Please enter 1, 2, or 3" ;;
     esac
   done
 }
@@ -74,6 +78,7 @@ get_target_dir() {
   case "$SCOPE" in
     project) echo "$(pwd)/.claude/skills/${SKILL_NAME}" ;;
     user)    echo "${HOME}/.claude/skills/${SKILL_NAME}" ;;
+    codex)   echo "${HOME}/.codex/skills/${SKILL_NAME}" ;;
   esac
 }
 
@@ -329,7 +334,8 @@ run_doctor() {
   local found_at=""
   for dir in \
     "$(pwd)/.claude/skills/${SKILL_NAME}" \
-    "${HOME}/.claude/skills/${SKILL_NAME}"; do
+    "${HOME}/.claude/skills/${SKILL_NAME}" \
+    "${HOME}/.codex/skills/${SKILL_NAME}"; do
     if [[ -f "${dir}/skill.md" ]]; then
       found_at="${dir}"
       break

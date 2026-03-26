@@ -13,10 +13,12 @@ One-liner (no clone needed):
 curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash
 
 # Specify scope directly
-curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --user
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --user     # Claude Code user
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --project  # Claude Code project
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --codex    # Codex agent
 
-# Project scope, skip dependency prompts
-curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --project --skip-deps
+# Skip dependency prompts
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --user --skip-deps
 ```
 
 Or clone and run locally:
@@ -59,6 +61,6 @@ install.sh            ← installer script
 
 ## Usage
 
-安装后在 Claude Code 中触发关键词：旅行计划、旅游攻略、出行规划、行程安排、去哪里玩、目的地推荐 等。
+安装后在 Claude Code / Codex 中触发关键词：旅行计划、旅游攻略、出行规划、行程安排、去哪里玩、目的地推荐 等。
 
 即使只说了时间和人员但不确定目的地，也会进入推荐流程。
