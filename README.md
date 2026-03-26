@@ -6,19 +6,24 @@ Claude Code skill，生成详细的多日旅行计划 HTML 页面。
 
 ## Install
 
+One-liner (no clone needed):
+
+```bash
+# Interactive — asks scope + dependencies
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash
+
+# Specify scope directly
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --user
+
+# Project scope, skip dependency prompts
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --project --skip-deps
+```
+
+Or clone and run locally:
+
 ```bash
 git clone git@github.com:tianxingyang/skills-travel-planner.git
-cd skills-travel-planner
-
-# Interactive — asks scope + dependencies
-./install.sh
-
-# Or specify scope directly
-./install.sh --project   # current project only
-./install.sh --user      # all projects
-
-# Skip dependency prompts
-./install.sh --user --skip-deps
+cd skills-travel-planner && ./install.sh
 ```
 
 ## Dependencies
