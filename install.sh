@@ -125,20 +125,21 @@ check_flyai() {
   warn "Not found"
   printf "\n    ${YELLOW}Fallback:${NC} web search for travel data (no real-time pricing)\n\n"
   printf "    Install options:\n"
-  printf "      ${CYAN}1)${NC} npm install -g flyai\n"
-  printf "      ${CYAN}2)${NC} Claude Code plugin (add to settings.json)\n"
+  printf "      ${CYAN}1)${NC} npm i -g @fly-ai/flyai-cli\n"
+  printf "      ${CYAN}2)${NC} Claude Code plugin (via /plugin command)\n"
   printf "      ${CYAN}s)${NC} Skip — use web search fallback\n\n"
 
   prompt "    Choice [1/2/s]: " choice
   case "$choice" in
     1)
-      info "Running: npm install -g flyai"
-      if npm install -g flyai; then ok "flyai installed"; record flyai ok
+      info "Running: npm i -g @fly-ai/flyai-cli"
+      if npm i -g @fly-ai/flyai-cli; then ok "flyai-cli installed"; record flyai ok
       else err "Install failed"; record flyai failed; fi
       ;;
     2)
-      info "Add to your .claude/settings.json:"
-      printf '    {"enabledPlugins": {"flyai@flyai-marketplace": true}}\n'
+      info "Run these in Claude Code:"
+      printf "      ${DIM}/plugin marketplace add alibaba-flyai/flyai-skill${NC}\n"
+      printf "      ${DIM}/plugin install flyai@alibaba-flyai-flyai-skill${NC}\n"
       record flyai manual
       ;;
     *)
