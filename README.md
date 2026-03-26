@@ -12,10 +12,10 @@ One-liner (no clone needed):
 # Interactive — asks scope + dependencies
 curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash
 
-# Specify scope directly
-curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --user     # Claude Code user
-curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --project  # Claude Code project
-curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --codex    # Codex agent
+# Specify agent + scope directly
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --user              # Claude Code, user
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --codex --user      # Codex, user
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --codex --project   # Codex, project
 
 # Skip dependency prompts
 curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --user --skip-deps

@@ -20,31 +20,41 @@ usage() {
   cat <<EOF
 Usage: ./install.sh [OPTIONS]
 
-Install the travel-planner skill for Claude Code.
+Install the travel-planner skill for Claude Code or Codex.
 
-Options:
-  -p, --project     Install to current project scope (./.claude/skills/)
-  -u, --user        Install to user scope (~/.claude/skills/)
-  -c, --codex       Install to Codex agent (~/.codex/skills/)
-  --skip-deps       Skip dependency checks
-  --doctor          Check skill installation and dependency status
-  -h, --help        Show this help
+Agent (default: claude):
+  --claude            Target Claude Code
+  --codex             Target Codex
 
-If no scope is specified, the script will ask interactively.
+Scope (default: interactive):
+  -p, --project       Install to current project scope
+  -u, --user          Install to user scope
+
+Other:
+  --skip-deps         Skip dependency checks
+  --doctor            Check skill installation and dependency status
+  -h, --help          Show this help
+
+Examples:
+  ./install.sh                        # interactive
+  ./install.sh --user                 # Claude Code, user scope
+  ./install.sh --codex --project      # Codex, project scope
 EOF
   exit 0
 }
 
 # ─── Parse Args ───
+AGENT=""
 SCOPE=""
 SKIP_DEPS=false
 DOCTOR=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --claude)     AGENT="claude"; shift ;;
+    --codex)      AGENT="codex"; shift ;;
     -p|--project) SCOPE="project"; shift ;;
     -u|--user)    SCOPE="user"; shift ;;
-    -c|--codex)   SCOPE="codex"; shift ;;
     --skip-deps)  SKIP_DEPS=true; shift ;;
     --doctor)     DOCTOR=true; shift ;;
     -h|--help)    usage ;;
@@ -52,33 +62,62 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# ─── Agent Selection ───
+select_agent() {
+  if [[ -n "$AGENT" ]]; then
+    return
+  fi
+
+  printf "\n  Select agent:\n"
+  printf "    ${CYAN}1)${NC} Claude Code\n"
+  printf "    ${CYAN}2)${NC} Codex\n\n"
+
+  while true; do
+    prompt "  Agent [1/2]: " choice
+    case "$choice" in
+      1) AGENT="claude"; return ;;
+      2) AGENT="codex"; return ;;
+      *) warn "Please enter 1 or 2" ;;
+    esac
+  done
+}
+
 # ─── Scope Selection ───
 select_scope() {
   if [[ -n "$SCOPE" ]]; then
     return
   fi
 
-  printf "\n  Select installation scope:\n"
-  printf "    ${CYAN}1)${NC} project    — Current directory only ${DIM}($(pwd)/.claude/skills/)${NC}\n"
-  printf "    ${CYAN}2)${NC} user       — All Claude Code projects ${DIM}(~/.claude/skills/)${NC}\n"
-  printf "    ${CYAN}3)${NC} codex      — Codex agent ${DIM}(~/.codex/skills/)${NC}\n\n"
+  local base_dir
+  case "$AGENT" in
+    claude) base_dir=".claude" ;;
+    codex)  base_dir=".codex" ;;
+  esac
+
+  printf "\n  Select scope:\n"
+  printf "    ${CYAN}1)${NC} project — Current directory ${DIM}($(pwd)/${base_dir}/skills/)${NC}\n"
+  printf "    ${CYAN}2)${NC} user    — All projects ${DIM}(~/${base_dir}/skills/)${NC}\n\n"
 
   while true; do
-    prompt "  Choice [1/2/3]: " choice
+    prompt "  Scope [1/2]: " choice
     case "$choice" in
       1) SCOPE="project"; return ;;
       2) SCOPE="user"; return ;;
-      3) SCOPE="codex"; return ;;
-      *) warn "Please enter 1, 2, or 3" ;;
+      *) warn "Please enter 1 or 2" ;;
     esac
   done
 }
 
 get_target_dir() {
+  local base_dir
+  case "$AGENT" in
+    claude) base_dir=".claude" ;;
+    codex)  base_dir=".codex" ;;
+  esac
+
   case "$SCOPE" in
-    project) echo "$(pwd)/.claude/skills/${SKILL_NAME}" ;;
-    user)    echo "${HOME}/.claude/skills/${SKILL_NAME}" ;;
-    codex)   echo "${HOME}/.codex/skills/${SKILL_NAME}" ;;
+    project) echo "$(pwd)/${base_dir}/skills/${SKILL_NAME}" ;;
+    user)    echo "${HOME}/${base_dir}/skills/${SKILL_NAME}" ;;
   esac
 }
 
@@ -331,31 +370,27 @@ run_doctor() {
   # ── Skill Installation ──
   printf "\n  ${BOLD}Skill${NC}\n"
 
-  local found_at=""
+  local found_any=false
   for dir in \
     "$(pwd)/.claude/skills/${SKILL_NAME}" \
     "${HOME}/.claude/skills/${SKILL_NAME}" \
+    "$(pwd)/.codex/skills/${SKILL_NAME}" \
     "${HOME}/.codex/skills/${SKILL_NAME}"; do
     if [[ -f "${dir}/skill.md" ]]; then
-      found_at="${dir}"
-      break
+      found_any=true
+      printf "    ${GREEN}✓${NC} %s\n" "${dir}"
+      for f in template.html preview.html generate.py; do
+        if [[ -f "${dir}/assets/${f}" ]]; then
+          printf "      ${GREEN}✓${NC} assets/${f}\n"
+        else
+          printf "      ${RED}✗${NC} assets/${f} ${DIM}missing${NC}\n"
+        fi
+      done
     fi
   done
 
-  if [[ -n "$found_at" ]]; then
-    printf "    ${GREEN}✓${NC} %-20s %s\n" "skill.md" "${found_at}"
-    # check assets
-    local assets_ok=true
-    for f in template.html preview.html generate.py; do
-      if [[ -f "${found_at}/assets/${f}" ]]; then
-        printf "    ${GREEN}✓${NC} %-20s %s\n" "assets/${f}" "OK"
-      else
-        printf "    ${RED}✗${NC} %-20s %s\n" "assets/${f}" "Missing"
-        assets_ok=false
-      fi
-    done
-  else
-    printf "    ${RED}✗${NC} %-20s %s\n" "skill.md" "Not installed"
+  if ! $found_any; then
+    printf "    ${RED}✗${NC} Not installed in any scope\n"
     printf "      ${DIM}Run ./install.sh to install${NC}\n"
   fi
 
@@ -423,9 +458,9 @@ run_doctor() {
 
   # ── Summary ──
   printf "\n  ${BOLD}──────────────────────────────────${NC}\n"
-  if [[ -n "$found_at" ]] && [[ $passed -eq $total ]]; then
+  if $found_any && [[ $passed -eq $total ]]; then
     printf "  ${GREEN}All good!${NC} Skill installed, ${passed}/${total} deps available.\n"
-  elif [[ -n "$found_at" ]]; then
+  elif $found_any; then
     printf "  Skill installed. ${GREEN}${passed}${NC}/${total} deps available.\n"
     printf "  ${DIM}Missing deps have automatic fallbacks — skill still works.${NC}\n"
     printf "  ${DIM}Run ./install.sh to install missing dependencies.${NC}\n"
@@ -446,6 +481,7 @@ main() {
   printf "  ${BOLD}║   Travel Planner — Skill Installer   ║${NC}\n"
   printf "  ${BOLD}╚══════════════════════════════════════╝${NC}\n"
 
+  select_agent
   select_scope
   install_skill
 
