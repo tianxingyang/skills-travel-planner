@@ -13,6 +13,9 @@ warn() { printf "  ${YELLOW}!${NC} %s\n" "$1"; }
 err()  { printf "  ${RED}✗${NC} %s\n" "$1"; }
 info() { printf "  ${CYAN}→${NC} %s\n" "$1"; }
 
+# read from /dev/tty so it works under curl | bash
+prompt() { read -rp "$1" "$2" < /dev/tty; }
+
 usage() {
   cat <<EOF
 Usage: ./install.sh [OPTIONS]
@@ -58,7 +61,7 @@ select_scope() {
   printf "    ${CYAN}2)${NC} user    — All projects ${DIM}(~/.claude/skills/)${NC}\n\n"
 
   while true; do
-    read -rp "  Choice [1/2]: " choice
+    prompt "  Choice [1/2]: " choice
     case "$choice" in
       1) SCOPE="project"; return ;;
       2) SCOPE="user"; return ;;
@@ -126,7 +129,7 @@ check_flyai() {
   printf "      ${CYAN}2)${NC} Claude Code plugin (add to settings.json)\n"
   printf "      ${CYAN}s)${NC} Skip — use web search fallback\n\n"
 
-  read -rp "    Choice [1/2/s]: " choice
+  prompt "    Choice [1/2/s]: " choice
   case "$choice" in
     1)
       info "Running: npm install -g flyai"
@@ -178,7 +181,7 @@ check_mcporter() {
   printf "      ${CYAN}2)${NC} Docker compose (if you have a compose file)\n"
   printf "      ${CYAN}s)${NC} Skip — use web search fallback\n\n"
 
-  read -rp "    Choice [1/2/s]: " choice
+  prompt "    Choice [1/2/s]: " choice
   case "$choice" in
     1)
       if ! $cli_ok; then
@@ -223,7 +226,7 @@ check_grok_search() {
   printf "      ${CYAN}2)${NC} Configure manually in .mcp.json\n"
   printf "      ${CYAN}s)${NC} Skip — use built-in WebSearch\n\n"
 
-  read -rp "    Choice [1/2/s]: " choice
+  prompt "    Choice [1/2/s]: " choice
   case "$choice" in
     1)
       info "Running: npm install -g grok-search-mcp"
