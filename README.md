@@ -36,10 +36,14 @@ All optional — each has a built-in fallback via web search.
 | **mcporter** + 小红书 MCP | 小红书笔记搜索 | `site:xiaohongshu.com` web search |
 | **grok-search** MCP | 网络搜索 + 网页抓取 | built-in WebSearch / WebFetch |
 
-Check running Docker services:
+Diagnose installation status:
 
 ```bash
-docker ps | grep -iE 'flyai|mcporter|xiaohongshu|xhs|grok'
+# Local
+./install.sh --doctor
+
+# Remote
+curl -fsSL https://raw.githubusercontent.com/tianxingyang/skills-travel-planner/main/setup.sh | bash -s -- --doctor
 ```
 
 ## Structure

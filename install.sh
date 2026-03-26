@@ -23,6 +23,7 @@ Options:
   -p, --project     Install to current project scope (./.claude/skills/)
   -u, --user        Install to user scope (~/.claude/skills/)
   --skip-deps       Skip dependency checks
+  --doctor          Check skill installation and dependency status
   -h, --help        Show this help
 
 If no scope is specified, the script will ask interactively.
@@ -33,12 +34,14 @@ EOF
 # ─── Parse Args ───
 SCOPE=""
 SKIP_DEPS=false
+DOCTOR=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -p|--project) SCOPE="project"; shift ;;
     -u|--user)    SCOPE="user"; shift ;;
     --skip-deps)  SKIP_DEPS=true; shift ;;
+    --doctor)     DOCTOR=true; shift ;;
     -h|--help)    usage ;;
     *) err "Unknown option: $1"; usage ;;
   esac
@@ -287,8 +290,148 @@ print_summary() {
   printf "\n"
 }
 
+# ─── Doctor Mode ───
+doctor_check() {
+  local name="$1" desc="$2" fallback="$3"
+  shift 3
+  # remaining args are check commands (any passing = ok)
+  local found=false method=""
+
+  for check in "$@"; do
+    if eval "$check" &>/dev/null; then
+      found=true
+      method="$check"
+      break
+    fi
+  done
+
+  if $found; then
+    printf "    ${GREEN}✓${NC} %-20s %s\n" "$name" "$desc"
+    return 0
+  else
+    printf "    ${RED}✗${NC} %-20s %s\n" "$name" "${desc} ${DIM}— fallback: ${fallback}${NC}"
+    return 1
+  fi
+}
+
+run_doctor() {
+  printf "\n  ${BOLD}╔══════════════════════════════════════╗${NC}\n"
+  printf "  ${BOLD}║    Travel Planner — Doctor Check     ║${NC}\n"
+  printf "  ${BOLD}╚══════════════════════════════════════╝${NC}\n"
+
+  # ── Skill Installation ──
+  printf "\n  ${BOLD}Skill${NC}\n"
+
+  local found_at=""
+  for dir in \
+    "$(pwd)/.claude/skills/${SKILL_NAME}" \
+    "${HOME}/.claude/skills/${SKILL_NAME}"; do
+    if [[ -f "${dir}/skill.md" ]]; then
+      found_at="${dir}"
+      break
+    fi
+  done
+
+  if [[ -n "$found_at" ]]; then
+    printf "    ${GREEN}✓${NC} %-20s %s\n" "skill.md" "${found_at}"
+    # check assets
+    local assets_ok=true
+    for f in template.html preview.html generate.py; do
+      if [[ -f "${found_at}/assets/${f}" ]]; then
+        printf "    ${GREEN}✓${NC} %-20s %s\n" "assets/${f}" "OK"
+      else
+        printf "    ${RED}✗${NC} %-20s %s\n" "assets/${f}" "Missing"
+        assets_ok=false
+      fi
+    done
+  else
+    printf "    ${RED}✗${NC} %-20s %s\n" "skill.md" "Not installed"
+    printf "      ${DIM}Run ./install.sh to install${NC}\n"
+  fi
+
+  # ── Dependencies ──
+  printf "\n  ${BOLD}Dependencies${NC}\n"
+
+  local total=0 passed=0
+
+  total=$((total + 1))
+  if doctor_check \
+    "flyai" \
+    "飞猪实时数据 (机票/酒店/门票)" \
+    "web search" \
+    "docker_running flyai" \
+    "has_cmd flyai"; then
+    passed=$((passed + 1))
+  fi
+
+  total=$((total + 1))
+  if doctor_check \
+    "mcporter" \
+    "小红书 CLI" \
+    "site:xiaohongshu.com" \
+    "has_cmd mcporter"; then
+    passed=$((passed + 1))
+  fi
+
+  total=$((total + 1))
+  if doctor_check \
+    "xiaohongshu MCP" \
+    "小红书 MCP server (port 18060)" \
+    "site:xiaohongshu.com" \
+    "docker_running 'xiaohongshu\|xhs'" \
+    "port_open 18060"; then
+    passed=$((passed + 1))
+  fi
+
+  total=$((total + 1))
+  if doctor_check \
+    "grok-search" \
+    "网络搜索 MCP" \
+    "built-in WebSearch" \
+    "docker_running grok"; then
+    passed=$((passed + 1))
+  fi
+
+  # ── Docker Services ──
+  printf "\n  ${BOLD}Docker${NC}\n"
+  if has_cmd docker && docker info &>/dev/null; then
+    printf "    ${GREEN}✓${NC} Docker daemon running\n"
+    local containers
+    containers=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -iE 'flyai|mcporter|xiaohongshu|xhs|grok' || true)
+    if [[ -n "$containers" ]]; then
+      printf "    ${GREEN}✓${NC} Related containers:\n"
+      while IFS= read -r name; do
+        printf "      ${DIM}•${NC} %s\n" "$name"
+      done <<< "$containers"
+    else
+      printf "    ${DIM}–${NC} No related containers running\n"
+      printf "      ${DIM}docker ps | grep -iE 'flyai|mcporter|xiaohongshu|xhs|grok'${NC}\n"
+    fi
+  else
+    printf "    ${DIM}–${NC} Docker not available\n"
+  fi
+
+  # ── Summary ──
+  printf "\n  ${BOLD}──────────────────────────────────${NC}\n"
+  if [[ -n "$found_at" ]] && [[ $passed -eq $total ]]; then
+    printf "  ${GREEN}All good!${NC} Skill installed, ${passed}/${total} deps available.\n"
+  elif [[ -n "$found_at" ]]; then
+    printf "  Skill installed. ${GREEN}${passed}${NC}/${total} deps available.\n"
+    printf "  ${DIM}Missing deps have automatic fallbacks — skill still works.${NC}\n"
+    printf "  ${DIM}Run ./install.sh to install missing dependencies.${NC}\n"
+  else
+    printf "  ${RED}Skill not installed.${NC} Run ${BOLD}./install.sh${NC} first.\n"
+  fi
+  printf "\n"
+}
+
 # ─── Main ───
 main() {
+  if $DOCTOR; then
+    run_doctor
+    return
+  fi
+
   printf "\n  ${BOLD}╔══════════════════════════════════════╗${NC}\n"
   printf "  ${BOLD}║   Travel Planner — Skill Installer   ║${NC}\n"
   printf "  ${BOLD}╚══════════════════════════════════════╝${NC}\n"
