@@ -32,11 +32,11 @@ cd skills-travel-planner && ./install.sh
 
 All optional — each has a built-in fallback via web search.
 
-| Dependency | Purpose | Fallback |
-|---|---|---|
-| **flyai** | 飞猪实时数据（机票/酒店/门票） | web search (no real-time pricing) |
-| **mcporter** + 小红书 MCP | 小红书笔记搜索 | `site:xiaohongshu.com` web search |
-| **grok-search** MCP | 网络搜索 + 网页抓取 | built-in WebSearch / WebFetch |
+| Dependency | Purpose | Source | Fallback |
+|---|---|---|---|
+| **flyai** | 飞猪实时数据（机票/酒店/门票） | [alibaba-flyai/flyai-skill](https://github.com/alibaba-flyai/flyai-skill) | web search (no real-time pricing) |
+| **mcporter** + 小红书 MCP | 小红书笔记搜索 | — | `site:xiaohongshu.com` web search |
+| **grok-search** MCP | 网络搜索 + 网页抓取 | [GuDaStudio/GrokSearch](https://github.com/GuDaStudio/GrokSearch/tree/grok-with-tavily) | built-in WebSearch / WebFetch |
 
 Diagnose installation status:
 

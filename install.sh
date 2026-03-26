@@ -157,7 +157,7 @@ record() { DEP_STATUS+=("$1:$2"); }
 # ─── [1/3] flyai ───
 check_flyai() {
   printf "\n  ${BOLD}[1/3] flyai${NC} — 飞猪实时数据（机票 / 酒店 / 景点门票）\n"
-  printf "        ${DIM}Provides real-time pricing from Fliggy (Alibaba Travel)${NC}\n\n"
+  printf "        ${DIM}https://github.com/alibaba-flyai/flyai-skill${NC}\n\n"
 
   if docker_running flyai; then
     ok "Found (docker)"; record flyai ok; return
@@ -256,7 +256,7 @@ check_mcporter() {
 # ─── [3/3] grok-search ───
 check_grok_search() {
   printf "\n  ${BOLD}[3/3] grok-search MCP${NC} — 网络搜索（通用信息检索）\n"
-  printf "        ${DIM}Powers web_search / web_fetch for real-time info${NC}\n\n"
+  printf "        ${DIM}https://github.com/GuDaStudio/GrokSearch (branch: grok-with-tavily)${NC}\n\n"
 
   if docker_running grok; then
     ok "Found (docker)"; record grok ok; return
